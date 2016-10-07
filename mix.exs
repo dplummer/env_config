@@ -2,12 +2,16 @@ defmodule EnvConfig.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :env_config,
-     version: "0.1.0",
-     elixir: "~> 1.3",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps()]
+    [
+      app: :env_config,
+      build_embedded: Mix.env == :prod,
+      deps: deps(),
+      description: description(),
+      elixir: "~> 1.3",
+      package: package(),
+      start_permanent: Mix.env == :prod,
+      version: "0.1.0",
+    ]
   end
 
   # Configuration for the OTP application
@@ -28,5 +32,21 @@ defmodule EnvConfig.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     []
+  end
+
+  defp description do
+    """
+    Handles fetching values from config with support for runtime ENV loading.
+    """
+  end
+
+  defp package do
+    [
+      name: :avrolixr,
+      files: ["lib", "mix.exs", "README.md"],
+      maintainers: ["Donald Plummer"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/dplummer/env_config"}
+    ]
   end
 end

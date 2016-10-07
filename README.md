@@ -12,20 +12,33 @@ is provided.
 
 An optional default value can be provided if desired.
 
+In your `config/config.exs`:
+
+```
+# maybe you start your app with FOO_KEY=abcd
+config :foo_app, :some_setting, {:system, "FOO_KEY"}
+```
+
+In your application:
+
+```
+EnvConfig.get(:foo_app, :some_setting) # => "abcd"
+```
+
 ## Example
 
 ```elixir
 iex> {test_var, expected_value} = System.get_env |> Enum.take(1) |> List.first
 ...> Application.put_env(:myapp, :test_var, {:system, test_var})
-...> ^expected_value = #{__MODULE__}.get(:myapp, :test_var)
+...> ^expected_value = EnvConfig.get(:myapp, :test_var)
 ...> :ok
 :ok
 
 iex> Application.put_env(:myapp, :test_var2, 1)
-...> 1 = #{__MODULE__}.get(:myapp, :test_var2)
+...> 1 = EnvConfig.get(:myapp, :test_var2)
 1
 
-iex> :default = #{__MODULE__}.get(:myapp, :missing_var, :default)
+iex> :default = EnvConfig.get(:myapp, :missing_var, :default)
 :default
 ```
 
