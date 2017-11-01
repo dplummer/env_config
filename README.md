@@ -48,17 +48,17 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
   1. Add `env_config` to your list of dependencies in `mix.exs`:
 
-    ```elixir
-    def deps do
-      [{:env_config, "~> 0.1.0"}]
-    end
-    ```
+```elixir
+def deps do
+  [{:env_config, "~> 0.1.0"}]
+end
+```
 
   2. Ensure `env_config` is started before your application:
 
-    ```elixir
-    def application do
-      [applications: [:env_config]]
-    end
-    ```
+```elixir
+def application do
+  [applications: [:env_config]]
+end
+```
 
