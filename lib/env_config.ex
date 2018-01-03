@@ -46,11 +46,16 @@ defmodule EnvConfig do
   end
 
   @doc """
+  Same as get/3, but raises an error if the key is not found.
+  """
+  def get!(app, key), do: get(app, key, :error) |> ok!(key)
+
+  @doc """
   Same as get/3, but returns the result as an integer.
   If the value cannot be converted to an integer, the
   default is returned instead.
   """
-  @spec get_integer(atom(), atom(), integer()) :: integer
+  @spec get_integer(atom(), atom(), integer() | nil | :error) :: integer
   def get_integer(app, key, default \\ nil) do
     case get(app, key, nil) do
       nil -> default
@@ -62,4 +67,12 @@ defmodule EnvConfig do
         end
     end
   end
+
+  @doc """
+  Same as get_integer/3, but raises an error if the key is not found
+  """
+  def get_integer!(app, key), do: get_integer(app, key, :error) |> ok!(key)
+
+  defp ok!(:error, key), do: raise "Required key :#{key} not found"
+  defp ok!(v, _), do: v
 end
