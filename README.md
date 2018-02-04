@@ -28,17 +28,31 @@ EnvConfig.get(:foo_app, :some_setting) # => "abcd"
 ## Example
 
 ```elixir
-iex> {test_var, expected_value} = System.get_env |> Enum.take(1) |> List.first
-...> Application.put_env(:myapp, :test_var, {:system, test_var})
-...> ^expected_value = EnvConfig.get(:myapp, :test_var)
-...> :ok
-:ok
+iex> Application.put_env(:myapp, :test_var, {:system, "MY_ENVVAR"})
+iex> System.put_env("MY_ENVVAR", "my_value")
+...> #{__MODULE__}.get(:myapp, :test_var)
+"my_value"
+
+iex> Application.put_env(:myapp, :test_var, {:system, :charlist, "MY_CHARLIST"})
+...> #{__MODULE__}.get(:myapp, :test_var)
+nil
+iex> System.put_env("MY_CHARLIST", "charlist_value")
+...> #{__MODULE__}.get(:myapp, :test_var)
+'charlist_value'
+
+iex> Application.put_env(:myapp, :test_var, {:system, :boolean, "MY_BOOLEAN"})
+...> System.put_env("MY_BOOLEAN", "off")
+...> #{__MODULE__}.get(:myapp, :test_var)
+false
+iex> System.put_env("MY_BOOLEAN", "true")
+...> #{__MODULE__}.get(:myapp, :test_var)
+true
 
 iex> Application.put_env(:myapp, :test_var2, 1)
-...> 1 = EnvConfig.get(:myapp, :test_var2)
+...> 1 = #{__MODULE__}.get(:myapp, :test_var2)
 1
 
-iex> :default = EnvConfig.get(:myapp, :missing_var, :default)
+iex> :default = #{__MODULE__}.get(:myapp, :missing_var, :default)
 :default
 ```
 
