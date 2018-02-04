@@ -27,22 +27,7 @@ defmodule EnvConfig do
   """
   @spec get(atom, atom, term | nil) :: term
   def get(app, key, default \\ nil) when is_atom(app) and is_atom(key) do
-    case Application.get_env(app, key) do
-      {:system, env_var} ->
-        case System.get_env(env_var) do
-          nil -> default
-          val -> val
-        end
-      {:system, env_var, preconfigured_default} ->
-        case System.get_env(env_var) do
-          nil -> preconfigured_default
-          val -> val
-        end
-      nil ->
-        default
-      val ->
-        val
-    end
+    expand(Application.get_env(app, key), default)
   end
 
   @doc """
@@ -73,6 +58,54 @@ defmodule EnvConfig do
   """
   def get_integer!(app, key), do: get_integer(app, key, :error) |> ok!(key)
 
+  @doc """
+  Same as get/3, but expect config entry is a map
+  and expand keys if {:system, "VAR"} is provided.
+
+  ## Example
+
+      iex> {test_var, expected_value} = System.get_env |> Enum.take(1) |> List.first
+      ...> Application.put_env(:myapp, :test_var, %{ key: {:system, test_var}})
+      ...> %{ key: ^expected_value } = #{__MODULE__}.get_map(:myapp, :test_var)
+      ...> :ok
+      :ok
+
+      iex> config = %{ key: {:system, "NOT_FOUND_ENV", "default_value" }}
+      ...> Application.put_env(:myapp, :test_var2, config)
+      ...> #{__MODULE__}.get_map(:myapp, :test_var2)
+      %{key: "default_value"}
+      
+      iex> #{__MODULE__}.get_map(:myapp, :test_var3, %{ key: "default_value" })
+      %{key: "default_value"}
+  """
+  @spec get_map(atom(), atom(), map()) :: map
+  def get_map(app, key, default \\ %{}) do
+    case get(app, key, %{}) do
+      m when is_map(m) ->
+        m
+          |> Map.merge(default)
+          |> Enum.map(fn {k, v} -> {k, expand(v, default[k])} end)
+          |> Map.new
+      m ->
+        m
+    end
+  end
+
   defp ok!(:error, key), do: raise "Required key :#{key} not found"
   defp ok!(v, _), do: v
+  
+  defp expand({:system, env_var}, default) do
+    case System.get_env(env_var) do
+      nil -> default
+      val -> val
+    end
+  end
+  defp expand({:system, env_var, preconfigured_default}, _) do
+    case System.get_env(env_var) do
+      nil -> preconfigured_default
+      val -> val
+    end
+  end
+  defp expand(nil, default), do: default
+  defp expand(val, _), do: val
 end
